@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Payment Page</title>
+</head>
+<body>
+    <h1>Payment for {{ payment.description }}</h1>
+    <p>Amount: {{ payment.amount }} {{ payment.currency }}</p>
+    <p>Status: {{ payment.status }}</p>
+    <form method="post">
+        {% csrf_token %}
+        <button type="submit" name="status" value="completed">Simulate Successful Payment</button>
+        <button type="submit" name="status" value="failed">Simulate Failed Payment</button>
+    </form>
+</body>
+</html>
