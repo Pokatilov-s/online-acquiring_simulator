@@ -8,7 +8,8 @@ from .models import Payment
 from .serializers import PaymentSerializer
 
 
-class CreatePaymentViewSet(viewsets.ModelViewSet):
+class PaymentViewSet(viewsets.ModelViewSet):
+    """Создать платёж"""
     serializer_class = PaymentSerializer
 
     def perform_create(self, serializer):
@@ -22,9 +23,19 @@ class CreatePaymentViewSet(viewsets.ModelViewSet):
 def payment_page(request, payment_uuid):
     """Сформировать платёжную страницу"""
     payment = get_object_or_404(Payment, uuid=payment_uuid)
-    # payment_info = {
-    #     'uuid': course.uuid,
-    #     'name': course.title,
-    #     'price': course.price
-    # }
-    return render(request, 'payment_page.html', {'payment': payment})
+    payment_info = {
+        'uuid': payment.uuid,
+        'description': payment.description,
+        'amount': payment.amount,
+        'currency': payment.currency,
+        'redirect': payment.redirect_url
+    }
+    return render(request, 'payment_page.html', {'payment': payment_info})
+
+
+def process_payment():
+    pass
+
+
+def success_page():
+    pass

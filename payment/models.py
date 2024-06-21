@@ -14,7 +14,8 @@ class Payment(models.Model):
     description = models.CharField(max_length=255)
     status = models.CharField(max_length=25, choices=Status.choices, default=Status.PENDING)
     created_at = models.DateTimeField(auto_now_add=True)
-    payment_url = models.URLField(blank=True, null=True)
+    payment_url = models.URLField(null=True)
+    redirect_url = models.URLField(null=True)
 
     class Meta:
         db_table = 'payments'
