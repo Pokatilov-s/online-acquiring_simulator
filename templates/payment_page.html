@@ -51,6 +51,7 @@
             <button type="submit" class="btn btn-primary btn-block" id="payButton">Оплатить</button>
             <button type="button" class="btn btn-secondary btn-block" id="cancelButton">Отменить</button>
         </form>
+        <input type="hidden" id="paymentUuid" value="{{ payment.uuid }}">
     </div>
 
     <div id="loading" class="d-none">
@@ -73,20 +74,20 @@
             $('#payButton').prop('disabled', true);
             $('#loading').removeClass('d-none');
 
+            const paymentUuid = $('#paymentUuid').val();
+            const url = `/pay/${paymentUuid}/process_payment/`;
+
             $.ajax({
-                url: '{% url "process_payment" %}',
+                url: url,
                 type: 'POST',
                 contentType: 'application/json',
                 headers: {
-                    'Authorization': `Token ${localStorage.getItem('notCoursesPrefix_authToken')}`,
                     'X-CSRFToken': '{{ csrf_token }}'
                 },
                 data: JSON.stringify({
                     card_number: $('#cardNumber').val(),
                     expiry_date: $('#expiryDate').val(),
-                    cvv: $('#cvv').val(),
-                    bank: $('#bank').val(),
-                    course_uuid: '{{ course_info.uuid }}',
+                    cvv: $('#cvv').val()
                 }),
                 success: function(response) {
                     $('#loading').addClass('d-none');

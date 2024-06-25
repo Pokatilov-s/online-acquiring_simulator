@@ -3,21 +3,33 @@ from django.urls import reverse
 from django.http import JsonResponse, HttpResponse
 from rest_framework.views import APIView
 from rest_framework.response import Response
-from rest_framework import status, viewsets
+from rest_framework import status, viewsets, decorators
 from .models import Payment
-from .serializers import PaymentSerializer
+from .serializers import PaymentSerializer, ProcessPaymentSerializer
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
-    """Создать платёж"""
     serializer_class = PaymentSerializer
+    queryset = Payment.objects.all()
 
     def perform_create(self, serializer):
+        """Создать платёж"""
         payment = serializer.save()
         payment.payment_url = self.request.build_absolute_uri(
             reverse('payment_page', kwargs={'payment_uuid': payment.uuid})
         )
         payment.save()
+
+    @decorators.action(methods=['POST'], detail=True, serializer_class=ProcessPaymentSerializer)
+    def process_payment(self, request, pk=None):
+        """Оплатить"""
+        payment = self.get_object()
+        serializer = self.get_serializer(data=request.data)
+        if serializer.is_valid(raise_exception=True):
+            payment.status = 'completed'
+            payment.save()
+            return Response({'status': 'Платеж успешно обработан'}, status=status.HTTP_200_OK)
+        return Response({'status': 'Ошибка платежа'}, status=status.HTTP_400_BAD_REQUEST)
 
 
 def payment_page(request, payment_uuid):

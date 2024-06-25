@@ -8,7 +8,7 @@ router.register(r'', PaymentViewSet, basename='pay')
 
 urlpatterns = [
     path('payment_page/<uuid:payment_uuid>/', payment_page, name='payment_page'),
-    path('process_payment', process_payment, name='process_payment'),
+    # path('process_payment', process_payment, name='process_payment'),
     path('success_page', success_page, name='success_page')
 ]
 
