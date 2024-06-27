@@ -6,7 +6,8 @@ import datetime as dt
 class PaymentSerializer(serializers.ModelSerializer):
     class Meta:
         model = Payment
-        fields = ['uuid', 'amount', 'currency', 'description', 'status', 'created_at', 'payment_url', 'redirect_url']
+        fields = ['uuid', 'amount', 'currency', 'description', 'status', 'created_at', 'payment_url', 'redirect_url',
+                  'webhook_url']
 
 
 class ProcessPaymentSerializer(serializers.Serializer):

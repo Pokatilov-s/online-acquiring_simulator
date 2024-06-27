@@ -6,6 +6,7 @@ from rest_framework.response import Response
 from rest_framework import status, viewsets, decorators
 from .models import Payment
 from .serializers import PaymentSerializer, ProcessPaymentSerializer
+from .tasks import send_webhook_notifications
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
@@ -28,6 +29,9 @@ class PaymentViewSet(viewsets.ModelViewSet):
         if serializer.is_valid(raise_exception=True):
             payment.status = 'completed'
             payment.save()
+
+            send_webhook_notifications.delay(payment.uuid)
+
             return Response({'status': 'Платеж успешно обработан'}, status=status.HTTP_200_OK)
         return Response({'status': 'Ошибка платежа'}, status=status.HTTP_400_BAD_REQUEST)
 
@@ -43,10 +47,6 @@ def payment_page(request, payment_uuid):
         'redirect': payment.redirect_url
     }
     return render(request, 'payment_page.html', {'payment': payment_info})
-
-
-def process_payment():
-    pass
 
 
 def success_page():
