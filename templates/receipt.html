@@ -1,0 +1,166 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Receipt Detail</title>
+    <!-- Подключение Bootstrap CSS -->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #f8f8f8;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            flex-direction: column;
+        }
+        .receipt-container {
+            background-color: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+        }
+        .receipt-header {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .receipt-header img {
+            max-width: 80px;
+            margin-bottom: 10px;
+        }
+        .receipt-header h2 {
+            margin: 0;
+            font-size: 24px;
+        }
+        .receipt-header p {
+            margin: 0;
+            font-size: 14px;
+        }
+        .receipt-table th, .receipt-table td {
+            text-align: left;
+            padding: 4px 0;
+            font-size: 14px;
+        }
+        .receipt-table th {
+            border-bottom: 1px solid #ddd;
+        }
+        .receipt-footer {
+            text-align: right;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .total-amount {
+            font-weight: bold;
+            margin-top: 10px;
+            border-top: 1px dashed #000;
+            padding-top: 10px;
+        }
+        .button-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            margin-top: 20px;
+        }
+        .button-container button {
+            display: block;
+            width: 100%;
+            text-align: center;
+            margin-top: 10px;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .button-container .print-button {
+            background-color: #28a745;
+            color: white;
+        }
+        .button-container .save-button {
+            background-color: #007bff;
+            color: white;
+        }
+        .button-container .back-button {
+            background-color: #dc3545;
+            color: white;
+        }
+        @media print {
+            .button-container {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-3">
+        <div class="row justify-content-center">
+            <div class="col-md-8 col-lg-6">
+                <!-- Уведомление об успешной обработке платежа -->
+                <div class="alert alert-success text-center" role="alert">
+                    Платеж успешно обработан!
+                </div>
+                <!-- Контейнер чека -->
+                <div class="receipt-container">
+                    <div class="receipt-header">
+                        <img src=" " alt="Company Logo">
+                        <h2>Company Name</h2>
+                        <p>Address Line 1</p>
+                        <p>Address Line 2</p>
+                        <p>Phone: (123) 456-7890</p>
+                        <p>Receipt #: {{ receipt.id }}</p>
+                        <p>Date: {{ receipt.created_at|date:"Y-m-d H:i:s" }}</p>
+                        <p>Payment Type: {{ receipt.payment_type }}</p>
+                    </div>
+                    <table class="receipt-table table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Qty</th>
+                                <th>Unit Price</th>
+                                <th>Total</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in receipt.products.all %}
+                            <tr>
+                                <td>{{ product.name }}</td>
+                                <td>{{ product.quantity }}</td>
+                                <td>{{ product.price_per_unit }}</td>
+                                <td>{{ product.total_price }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                    <div class="receipt-footer">
+                        <p class="total-amount">Total: {{ receipt.total_amount }}</p>
+                    </div>
+                    <div class="button-container">
+                        <button class="print-button" onclick="window.print()">Print Receipt</button>
+                        <button class="save-button" onclick="saveReceipt()">Save Receipt</button>
+                        <button class="back-button" onclick="window.location.href='/shop/'">Return to Shop</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- Подключение Bootstrap JS и зависимостей -->
+    <script src="https://code.jquery.com/jquery-3.5.1.slim.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@popperjs/core@2.9.2/dist/umd/popper.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    <script>
+        function saveReceipt() {
+            const element = document.querySelector('.receipt-container');
+            const opt = {
+                margin: 1,
+                filename: 'receipt_{{ receipt.id }}.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().from(element).set(opt).save();
+        }
+    </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.9.2/html2pdf.bundle.min.js"></script>
+</body>
+</html>

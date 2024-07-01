@@ -1,7 +1,7 @@
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from rest_framework.response import Response
-from rest_framework import status, viewsets, decorators
+from rest_framework import status, viewsets, decorators, generics
 from .models import Payment
 from .serializers import PaymentSerializer, ProcessPaymentSerializer
 from .tasks import send_webhook_notifications
@@ -35,7 +35,8 @@ class PaymentViewSet(viewsets.ModelViewSet):
                                          description=f'Создана задача на уведомление task {task_id}',
                                          type_notif='webhook')
 
-            return Response({'status': 'Платеж успешно обработан'}, status=status.HTTP_200_OK)
+            return Response({'status': 'success', 'message': 'Платеж успешно обработан'},
+                            status=status.HTTP_200_OK)
         return Response({'status': 'Ошибка платежа'}, status=status.HTTP_400_BAD_REQUEST)
 
 
@@ -52,5 +53,10 @@ def payment_page(request, payment_uuid):
     return render(request, 'payment_page.html', {'payment': payment_info})
 
 
-def success_page():
+def success_page(request):
+    """Вернуть страницу успешного платежа"""
+    return render(request, 'receipt.html')
+
+
+class SuccessPage(generics.RetrieveAPIView):
     pass
