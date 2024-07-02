@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from rest_framework.response import Response
@@ -55,7 +56,33 @@ def payment_page(request, payment_uuid):
 
 def success_page(request):
     """Вернуть страницу успешного платежа"""
-    return render(request, 'receipt.html')
+    receipt = {
+        'id': '808800808080',
+        'created_at': datetime.now(),
+        'payment_type': 'Online',
+        'total_amount': 200.00,
+        'currency': 'RUB'
+    }
+    products = [{
+        'name': 'Python course',
+        'quantity': 1,
+        'price_per_unit': 100.00,
+        'total_price': 100.00
+        },
+        {
+            'name': 'Python course + ',
+            'quantity': 1,
+            'price_per_unit': 100.00,
+            'total_price': 100.00
+        },
+        {
+            'name': 'JAVA course',
+            'quantity': 1,
+            'price_per_unit': 100.00,
+            'total_price': 100.00
+        },
+    ]
+    return render(request, 'receipt.html', {'receipt': receipt, 'products': products})
 
 
 class SuccessPage(generics.RetrieveAPIView):

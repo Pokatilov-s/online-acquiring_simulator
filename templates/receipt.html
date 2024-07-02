@@ -122,7 +122,7 @@
                             </tr>
                         </thead>
                         <tbody>
-                            {% for product in receipt.products.all %}
+                            {% for product in products %}
                             <tr>
                                 <td>{{ product.name }}</td>
                                 <td>{{ product.quantity }}</td>
@@ -133,7 +133,7 @@
                         </tbody>
                     </table>
                     <div class="receipt-footer">
-                        <p class="total-amount">Total: {{ receipt.total_amount }}</p>
+                        <p class="total-amount">Total: {{ receipt.total_amount }} {{ receipt.currency }}</p>
                     </div>
                     <div class="button-container">
                         <button class="print-button" onclick="window.print()">Print Receipt</button>

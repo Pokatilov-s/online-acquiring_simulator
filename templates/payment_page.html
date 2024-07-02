@@ -27,14 +27,45 @@
             text-align: center;
             margin-top: 20px;
         }
+        .list-group-item {
+            font-size: 12px;
+            padding: 5px 10px;
+            border: none;
+            background-color: transparent;
+        }
+        .details-button {
+            margin-top: -10px;
+            margin-bottom: 10px;
+            color: gray;
+            font-size: 12px;
+            text-align: center;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
 <div class="container mt-5">
-    <h2 class="text-center">Оплата: {{ payment.description }}</h2>
-    <p class="text-center">Стоимость: {{ payment.amount }} {{ payment.currency }}.</p>
+    <h2 class="text-center">Online-payments</h2>
+    <p class="text-center">К оплате: {{ payment.amount }} {{ payment.currency }}.</p>
 
-    <div class="card card-style">
+    <!-- Кнопка для отображения выпадающего списка -->
+    <div class="details-button" data-toggle="collapse" data-target="#paymentDetails" aria-expanded="false" aria-controls="paymentDetails">
+        Детали платежа
+    </div>
+
+    <!-- Выпадающий список с деталями платежа -->
+    <div class="collapse" id="paymentDetails">
+        <ul class="list-group">
+            {% for product in payment.products.all %}
+            <li class="list-group-item d-flex justify-content-between align-items-center">
+                {{ product.name }} ({{ product.quantity }} x {{ product.price_per_unit }} {{ payment.currency }})
+                <span>{{ product.total_price }} {{ payment.currency }}</span>
+            </li>
+            {% endfor %}
+        </ul>
+    </div>
+
+    <div class="card card-style mt-4">
         <form id="payment-form">
             <div class="form-group">
                 <label for="cardNumber">Номер карты</label>
@@ -60,6 +91,27 @@
 
     <div id="receipt" class="d-none">
         <p>Платеж успешно обработан!</p>
+    </div>
+</div>
+
+<!-- Модальное окно для ошибок валидации -->
+<div class="modal fade" id="errorModal" tabindex="-1" role="dialog" aria-labelledby="errorModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="errorModalLabel">Ошибка валидации</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Закрыть">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p id="errorText" class="text-danger"></p>
+                <ul id="errorList"></ul>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Закрыть</button>
+            </div>
+        </div>
     </div>
 </div>
 
@@ -94,17 +146,42 @@
                     if (response.status === 'success') {
                         window.location.href = '{% url "success_page" %}';
                     } else {
-                        alert(response.message);
+                        showErrorModal(response);
                         $('#payButton').prop('disabled', false);
                     }
                 },
-                error: function() {
+                error: function(jqXHR) {
                     $('#loading').addClass('d-none');
-                    alert('Произошла ошибка при обработке платежа.');
+                    const response = jqXHR.responseJSON || { message: 'Произошла ошибка при обработке платежа.' };
+                    showErrorModal(response, jqXHR.status);
                     $('#payButton').prop('disabled', false);
                 }
             });
         });
+
+        function showErrorModal(response, statusCode) {
+            const errorList = $('#errorList');
+            const errorText = $('#errorText');
+            errorList.empty();
+
+            if (statusCode === 400) {
+                errorText.text('Ошибка валидации. Пожалуйста, проверьте введенные данные.');
+            } else if (statusCode === 500) {
+                errorText.text('Внутренняя ошибка сервера. Попробуйте позже.');
+            } else {
+                errorText.text(response.message || 'Произошла ошибка при обработке платежа.');
+            }
+
+            if (response.errors) {
+                $.each(response.errors, function(field, messages) {
+                    $.each(messages, function(index, message) {
+                        errorList.append('<li>' + field + ': ' + message + '</li>');
+                    });
+                });
+            }
+
+            $('#errorModal').modal('show');
+        }
     });
 </script>
 </body>
