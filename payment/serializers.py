@@ -8,6 +8,17 @@ class PaymentSerializer(serializers.ModelSerializer):
         model = Payment
         fields = ['uuid', 'amount', 'currency', 'description', 'status', 'created_at', 'payment_url', 'redirect_url',
                   'webhook_url']
+        extra_kwargs = {
+            'description': {'required': False},
+        }
+
+    def validate(self, attrs):
+        description = attrs.get('description')
+        if description:
+            pass
+
+        attrs['description'] = False
+        return attrs
 
 
 class ProcessPaymentSerializer(serializers.Serializer):

@@ -63,11 +63,12 @@ def success_page(request):
         'total_amount': 200.00,
         'currency': 'RUB'
     }
-    products = [{
-        'name': 'Python course',
-        'quantity': 1,
-        'price_per_unit': 100.00,
-        'total_price': 100.00
+    products = [
+        {
+            'name': 'Python course',
+            'quantity': 1,
+            'price_per_unit': 100.00,
+            'total_price': 100.00
         },
         {
             'name': 'Python course + ',
@@ -85,5 +86,5 @@ def success_page(request):
     return render(request, 'receipt.html', {'receipt': receipt, 'products': products})
 
 
-class SuccessPage(generics.RetrieveAPIView):
+class ReceiptPayment(generics.RetrieveAPIView):
     pass
