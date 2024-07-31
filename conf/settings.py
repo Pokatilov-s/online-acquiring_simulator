@@ -18,7 +18,7 @@ INSTALLED_APPS = [
 
     'rest_framework',
     'django_filters',
-    # 'celery',
+    'celery',
 
     'payment',
     'account',
