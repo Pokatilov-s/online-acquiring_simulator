@@ -16,7 +16,7 @@ def send_webhook_notifications(self, pk_payment):
 
     url = payment.webhook_url
     message = {
-        'payment_id': str(payment.uuid),
+        'payment_id': str(payment.id),
         'status': payment.status
     }
 

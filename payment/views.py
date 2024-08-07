@@ -17,7 +17,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
         """Создать платёж"""
         payment = serializer.save()
         payment.payment_url = self.request.build_absolute_uri(
-            reverse('payment_page', kwargs={'payment_uuid': payment.uuid})
+            reverse('payment_page', kwargs={'payment_id': payment.id})
         )
         payment.save()
 
@@ -30,7 +30,7 @@ class PaymentViewSet(viewsets.ModelViewSet):
             payment.status = 'completed'
             payment.save()
 
-            task = send_webhook_notifications.delay(payment.uuid)
+            task = send_webhook_notifications.delay(payment.id)
             task_id = task.id
             creating_notification_record(payment=payment, status_notif='CREATED',
                                          description=f'Создана задача на уведомление task {task_id}',
@@ -41,11 +41,11 @@ class PaymentViewSet(viewsets.ModelViewSet):
         return Response({'status': 'Ошибка платежа'}, status=status.HTTP_400_BAD_REQUEST)
 
 
-def payment_page(request, payment_uuid):
+def payment_page(request, payment_id):
     """Сформировать платёжную страницу"""
-    payment = get_object_or_404(Payment, uuid=payment_uuid)
+    payment = get_object_or_404(Payment, pk=payment_id)
     payment_info = {
-        'uuid': payment.uuid,
+        'id': payment.id,
         'description': payment.description,
         'amount': payment.amount,
         'currency': payment.currency,

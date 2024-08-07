@@ -1,21 +1,39 @@
 from rest_framework import serializers
-from .models import Payment
+from .models import Payment, DescriptionPayment
 import datetime as dt
+from .services import description_validate
+
+
+class DescriptionField(serializers.Field):
+    def to_internal_value(self, data):
+        if data:
+            try:
+                description_validate(data)
+                return data
+            except serializers.ValidationError:
+                raise
+            except NotImplementedError:
+                raise serializers.ValidationError('Это поле должно быть либо строкой, либо списком.')
+        return data
+
+    def to_representation(self, value):
+        return value
 
 
 class PaymentSerializer(serializers.ModelSerializer):
+    description = DescriptionField(required=False)
+
     class Meta:
         model = Payment
-        fields = ['uuid', 'amount', 'currency', 'description', 'status', 'created_at', 'payment_url', 'redirect_url',
+        fields = ['id', 'amount', 'currency', 'description', 'status', 'created_at', 'payment_url', 'redirect_url',
                   'webhook_url']
-        extra_kwargs = {
-            'description': {'required': False},
-        }
 
     def validate(self, attrs):
         description = attrs.get('description')
         if description:
-            pass
+            # attrs['description_info'] = description
+            attrs['description'] = True
+            return attrs
 
         attrs['description'] = False
         return attrs
@@ -47,3 +65,4 @@ class ProcessPaymentSerializer(serializers.Serializer):
             raise serializers.ValidationError('Не корректный срок действия, должен быть в формате MM/YY '
                                               'и быть больше текущей даты')
         return value
+
