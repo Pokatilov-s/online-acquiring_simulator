@@ -7,7 +7,7 @@ router = routers.SimpleRouter()
 router.register(r'', PaymentViewSet, basename='pay')
 
 urlpatterns = [
-    path('payment_page/<uuid:payment_uuid>/', payment_page, name='payment_page'),
+    path('payment_page/<uuid:payment_id>/', payment_page, name='payment_page'),
     path('success_page', success_page, name='success_page')
 ]
 
