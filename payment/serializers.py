@@ -31,12 +31,20 @@ class PaymentSerializer(serializers.ModelSerializer):
     def validate(self, attrs):
         description = attrs.get('description')
         if description:
-            # attrs['description_info'] = description
+            attrs['description_info'] = description
             attrs['description'] = True
             return attrs
 
         attrs['description'] = False
         return attrs
+
+    def create(self, validated_data):
+        description_info = validated_data.pop('description_info', False)
+        payment = Payment.objects.create(**validated_data)
+        if description_info:
+            payment.description_info = description_info
+            payment.save()
+        return payment
 
 
 class ProcessPaymentSerializer(serializers.Serializer):

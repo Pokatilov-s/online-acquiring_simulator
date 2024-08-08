@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.urls import reverse
 from rest_framework.response import Response
 from rest_framework import status, viewsets, decorators, generics
-from .models import Payment
+from .models import Payment, DescriptionPayment
 from .serializers import PaymentSerializer, ProcessPaymentSerializer
 from .tasks import send_webhook_notifications
 from .services import creating_notification_record
@@ -19,6 +19,10 @@ class PaymentViewSet(viewsets.ModelViewSet):
         payment.payment_url = self.request.build_absolute_uri(
             reverse('payment_page', kwargs={'payment_id': payment.id})
         )
+        description_info = serializer.validated_data.get('description_info')
+        if description_info:
+            description = DescriptionPayment.objects.using('mongo_db').create(description_info)
+        print(description_info)
         payment.save()
 
     @decorators.action(methods=['POST'], detail=True, serializer_class=ProcessPaymentSerializer)

@@ -35,5 +35,6 @@ class PaymentNotifications(models.Model):
 
 
 class DescriptionPayment(models.Model):
-    pass
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    description = models.JSONField()
 
