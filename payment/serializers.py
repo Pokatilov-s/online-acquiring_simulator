@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import Payment, DescriptionPayment
+from .models import Payment
 import datetime as dt
 from .services import description_validate
 
