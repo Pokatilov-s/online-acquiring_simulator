@@ -4,10 +4,10 @@ from django.urls import reverse
 from rest_framework.response import Response
 from rest_framework import status, viewsets, decorators, generics
 from .models import Payment
-from .mongo import insert_description
+from .services.mongo import insert_description, read_description
 from .serializers import PaymentSerializer, ProcessPaymentSerializer
 from .tasks import send_webhook_notifications
-from .services import creating_notification_record
+from .services.db import insert_notification_record
 
 
 class PaymentViewSet(viewsets.ModelViewSet):
@@ -36,9 +36,9 @@ class PaymentViewSet(viewsets.ModelViewSet):
 
             task = send_webhook_notifications.delay(payment.id)
             task_id = task.id
-            creating_notification_record(payment=payment, status_notif='CREATED',
-                                         description=f'Создана задача на уведомление task {task_id}',
-                                         type_notif='webhook')
+            insert_notification_record(payment=payment, status_notif='CREATED',
+                                       description=f'Создана задача на уведомление task {task_id}',
+                                       type_notif='webhook')
 
             return Response({'status': 'success', 'message': 'Платеж успешно обработан'},
                             status=status.HTTP_200_OK)
@@ -58,35 +58,39 @@ def payment_page(request, payment_id):
     return render(request, 'payment_page.html', {'payment': payment_info})
 
 
-def success_page(request):
+def success_page(request, payment_id):
     """Вернуть страницу успешного платежа"""
+    payment = Payment.objects.values('description_id', 'status').filter(pk=payment_id)
+    description_id = payment[0]['description_id']
     receipt = {
         'id': '808800808080',
         'created_at': datetime.now(),
         'payment_type': 'Online',
         'total_amount': 200.00,
+
         'currency': 'RUB'
     }
-    products = [
-        {
-            'name': 'Python course',
-            'quantity': 1,
-            'price_per_unit': 100.00,
-            'total_price': 100.00
-        },
-        {
-            'name': 'Python course + ',
-            'quantity': 1,
-            'price_per_unit': 100.00,
-            'total_price': 100.00
-        },
-        {
-            'name': 'JAVA course',
-            'quantity': 1,
-            'price_per_unit': 100.00,
-            'total_price': 100.00
-        },
-    ]
+    products = read_description(description_id).get('description')
+    # products = [
+    #     {
+    #         'name': 'Python course',
+    #         'quantity': 1,
+    #         'price_per_unit': 100.00,
+    #         'total_price': 100.00
+    #     },
+    #     {
+    #         'name': 'Python course + ',
+    #         'quantity': 1,
+    #         'price_per_unit': 100.00,
+    #         'total_price': 100.00
+    #     },
+    #     {
+    #         'name': 'JAVA course',
+    #         'quantity': 1,
+    #         'price_per_unit': 100.00,
+    #         'total_price': 100.00
+    #     },
+    # ]
     return render(request, 'receipt.html', {'receipt': receipt, 'products': products})
 
 

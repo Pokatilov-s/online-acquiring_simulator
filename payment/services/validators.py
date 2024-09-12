@@ -1,6 +1,5 @@
 from rest_framework import serializers
 from rest_framework.exceptions import ValidationError
-from payment.models import PaymentNotifications
 from multipledispatch import dispatch
 
 
@@ -8,15 +7,6 @@ class DescriptionPaymentSerializer(serializers.Serializer):
     name = serializers.CharField(max_length=100)
     quantity = serializers.IntegerField(min_value=1, max_value=1000)
     price_per_unit = serializers.DecimalField(max_digits=10, decimal_places=2)
-
-
-def creating_notification_record(payment, status_notif, description, type_notif):
-    PaymentNotifications.objects.create(
-        payment=payment,
-        status=status_notif,
-        description=description,
-        type=type_notif,
-    )
 
 
 @dispatch(str)

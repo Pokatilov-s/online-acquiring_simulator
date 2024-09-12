@@ -1,7 +1,7 @@
 from rest_framework import serializers
 from .models import Payment
 import datetime as dt
-from .services import description_validate
+from .services.validators import description_validate
 
 
 class DescriptionField(serializers.Field):

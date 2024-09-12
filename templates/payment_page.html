@@ -144,7 +144,7 @@
                 success: function(response) {
                     $('#loading').addClass('d-none');
                     if (response.status === 'success') {
-                        window.location.href = '{% url "success_page" %}';
+                        window.location.href = '{% url "success_page" payment_id="paymentId"%}';
                     } else {
                         showErrorModal(response);
                         $('#payButton').prop('disabled', false);
